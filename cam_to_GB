@@ -1,3 +1,5 @@
+// カメラ映像を取得しリアルタイムでゲームボーイ風の映像に変換する
+// Get camera feed and convert into GameBoy like video in realtime 
 
 import processing.video.*;
 
