@@ -1,1 +1,61 @@
+import processing.video.*;
 
+Capture cam;
+
+color[] gbPalette;
+  // Resolution of GB
+int gbWidth = 160;
+int gbHeight = 144;
+int scaleFactor = 4;  // Scale setting（160x144 to 640x576）
+
+void settings() {
+  size(gbWidth * scaleFactor, gbHeight * scaleFactor);
+}
+
+void setup() {
+  // get cam device lists
+  String[] cameras = Capture.list();
+  println(cameras);
+
+  if (cameras.length == 0) {
+    println("FOUND NO CAM DEVICE");
+    exit();
+  } else {
+    cam = new Capture(this, gbWidth, gbHeight, cameras[0]);
+    cam.start();
+  }
+
+  // GB like 4 colors palette
+  gbPalette = new color[4];
+  gbPalette[0] = color(15, 56, 15);    // 濃い
+  gbPalette[1] = color(48, 98, 48);
+  gbPalette[2] = color(139, 172, 15);
+  gbPalette[3] = color(155, 188, 15);  // 明るい
+}
+
+void draw() {
+  if (cam.available()) {
+    cam.read();
+  }
+
+  cam.loadPixels();
+
+  for (int y = 0; y < gbHeight; y++) {
+    for (int x = 0; x < gbWidth; x++) {
+      int loc = x + y * gbWidth;
+      color c = cam.pixels[loc];
+
+      // NTSC
+      float brightness = red(c) * 0.299 + green(c) * 0.587 + blue(c) * 0.114;
+
+      // mapping
+      int level = int(map(brightness, 0, 255, 0, 4));
+      level = constrain(level, 0, 3);
+
+      // drawing
+      fill(gbPalette[level]);
+      noStroke();
+      rect(x * scaleFactor, y * scaleFactor, scaleFactor, scaleFactor);
+    }
+  }
+}
